@@ -18,7 +18,6 @@ void Sort(struct Bucket* start);// sort 함수
 void find(char* bigram, int sum);// hashing 하기위해 insert하는함수
 void Trim(char* str);//앞뒤 공백 및 특수문자 제거
 void make_bigram(char str[][50], int max_ind);//bigram 만들어서 hashing
-void delete_all_node(struct Bucket* h);//할당된 메모리 해제
 int find_list_len(struct Bucket* h);//linked list의 길이 구하기
 void quicksort(struct Bucket* h, int start, int fin); // quick sort
 void swap(struct Bucket* h, int a, int b); //원하는 두 ind 값을 swap
@@ -63,9 +62,6 @@ int main(){
     }
     print_max();
 
-    for(int i = 0; i < N; i++){
-        delete_all_node(Buckets[i]);
-    }
     fclose(fp);
 
     return 0;
@@ -166,24 +162,7 @@ void make_bigram(char str[][50],int max_ind){
     first_flag++;
 }
 
-//모든 동적할당 struct를 free하게 하는 함수
-void delete_all_node(struct Bucket* h)
-{
-    Bucket* cur;
-    cur = h;
 
-    Bucket* nxt;
-    
-    while(cur != NULL)
-    {
-        
-        nxt = cur->nextBucket;
-
-        free(cur);
-        
-        cur = nxt;
-    }
-}
 
 //linked list의 길이 구하기
 int find_list_len(struct Bucket* h){
@@ -201,7 +180,7 @@ int find_list_len(struct Bucket* h){
 struct Bucket* move(struct Bucket* h, int det){
     Bucket* temp = h;
     for(int i = 0; i < det; i++){
-        if(temp->nextBucket == NULL){
+        if((temp == NULL) || (temp->nextBucket == NULL)){
             break;
         }
         temp = temp->nextBucket;
@@ -249,18 +228,18 @@ void quicksort(struct Bucket* h, int start, int fin){
         else if(k == move(h,fin_s)->frequency){
             fin_s--;
         }
-        else if((move(h,start)->frequency - move(h,start_f)->frequency) * (move(h,start)->frequency - move(h,fin_s)->frequency) < 0 ){
+        else if((k - move(h,start_f)->frequency) * (k - move(h,fin_s)->frequency) < 0 ){
             if(move(h,start_f)->frequency < move(h,fin_s)->frequency){
                 swap(h,start_f,fin_s);
             }
             start_f++;
             fin_s--;
         }
-        else if(move(h, start_f)->frequency < move(h,start)->frequency){
+        else if(move(h, start_f)->frequency < k){
             swap(h, start_f, fin_s - 1);
             fin_s--;
         }
-        else if(move(h, start_f)->frequency > move(h,start)->frequency){
+        else if(move(h, start_f)->frequency > k){
             swap(h, start_f + 1,fin_s);
             start_f++;
         }
@@ -295,7 +274,7 @@ void print_max(){
     int max_fre = -1;
     int max_ind = -1;
     Bucket* temp;
-    for(int i = 0; i < 30; i++){
+    for(int i = 0; i <= 31; i++){
         max_fre = -1;
         max_ind = -1;
         for(int j = 0; j < N; j++){
@@ -305,8 +284,10 @@ void print_max(){
                 max_ind = j;
             }
         }
-
-        printf("%dst bigram : %s, frequency : %d\n",i,Buckets[max_ind]->Bigram,Buckets[max_ind]->frequency);
+        if(i <= 1){
+            continue;
+        }
+        printf("%dst bigram : %s, frequency : %d\n",i - 1,Buckets[max_ind]->Bigram,Buckets[max_ind]->frequency);
         temp = Buckets[max_ind];
         Buckets[max_ind] = temp->nextBucket;
     }
