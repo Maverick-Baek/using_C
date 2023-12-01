@@ -141,6 +141,17 @@ void Trim(char* str) {
     }
     
     str[end - start + 1] = '\0';
+    char* temp;
+    int temp_ind = 0;
+    for(int i = 0; i < strlen(str); i++){
+        if(isalnum(str[i])|| isspace(str[i])){
+            temp[i] = str[i];
+        }
+        else{
+            temp[i] = ' ';
+        }
+    }
+    strcpy(str,temp);    
 }
 
 
